@@ -1,5 +1,4 @@
 # Проект - Grabber
-[![Build Status](https://www.travis-ci.com/ViyChel/job4j_grabber.svg?branch=master)](https://www.travis-ci.com/ViyChel/job4j_grabber)
 
 ### Описание
 Проект представляет собой парсер вакансий. Парсинг вакансий осуществляется с сайта: https://www.sql.ru/.
@@ -20,17 +19,3 @@
 - JaCoCo
 - Travis CI
 - SLF4J
-
-
-__Результат парсинга в БД__<br>
-![img](img/list.png)
-
-__Структура таблицы БД__<br>
-![img](img/db.png)
-
-
-#### Контакты
-
-[![Linkedin](https://img.shields.io/badge/-linkedin-283e4a?style=flat&logo=linkedin&logoColor=white)](https://)&nbsp;
-[![Telegram](https://img.shields.io/badge/-telegram-grey?style=flat&logo=telegram&logoColor=white)](https://)&nbsp;
-[![Email](https://img.shields.io/badge/@%20email-005FED?style=flat&logo=mail&logoColor=white)](mailto:)&nbsp;
