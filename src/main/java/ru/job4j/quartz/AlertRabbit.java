@@ -2,7 +2,6 @@ package ru.job4j.quartz;
 
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
@@ -24,13 +23,14 @@ public class AlertRabbit {
      *Метод работает 10 сек.
      * @param args
      */
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, ClassNotFoundException {
+        Properties properties = getProperties();
+        Class.forName(getProperties().getProperty("driver-class-name"));
         try (Connection cn = DriverManager.getConnection(
-                getProperties().getProperty("url"),
-                getProperties().getProperty("username"),
-                getProperties().getProperty("password")
+                properties.getProperty("url"),
+                properties.getProperty("username"),
+                properties.getProperty("password")
         )) {
-            Class.forName(getProperties().getProperty("driver-class-name"));
             try {
                 Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
                 scheduler.start();
@@ -52,8 +52,6 @@ public class AlertRabbit {
             } catch (SchedulerException | InterruptedException e) {
                 e.printStackTrace();
             }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         }
     }
 
@@ -81,7 +79,8 @@ public class AlertRabbit {
      */
     public static Properties getProperties() {
         Properties properties = new Properties();
-        try (InputStream fis = new FileInputStream("./src/main/resources/rabbit.properties")) {
+        try (InputStream fis = AlertRabbit.class.getClassLoader()
+                .getResourceAsStream("rabbit.properties")) {
             properties.load(fis);
         } catch (IOException e) {
             e.printStackTrace();
