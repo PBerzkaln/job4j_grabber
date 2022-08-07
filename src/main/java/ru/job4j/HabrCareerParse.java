@@ -45,5 +45,14 @@ public class HabrCareerParse {
         for (String s : savedPages) {
             System.out.println(s);
         }
+        HabrCareerParse habr = new HabrCareerParse();
+        System.out.println(habr.retrieveDescription("https://career.habr.com/vacancies/1000100465"));
+    }
+
+    private String retrieveDescription(String link) throws IOException {
+        Connection connection = Jsoup.connect(link);
+        Document document = connection.get();
+        Element descElement = document.select(".style-ugc").first();
+        return descElement.text();
     }
 }
