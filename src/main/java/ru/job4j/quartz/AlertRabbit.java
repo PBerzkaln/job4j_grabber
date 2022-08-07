@@ -25,6 +25,7 @@ public class AlertRabbit {
      */
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
         Properties properties = getProperties();
+        int interval = Integer.parseInt(properties.getProperty("rabbit.interval"));
         Class.forName(getProperties().getProperty("driver-class-name"));
         try (Connection cn = DriverManager.getConnection(
                 properties.getProperty("url"),
@@ -40,7 +41,7 @@ public class AlertRabbit {
                         .usingJobData(data)
                         .build();
                 SimpleScheduleBuilder times = simpleSchedule()
-                        .withIntervalInSeconds(Integer.parseInt(getProperties().getProperty("rabbit.interval")))
+                        .withIntervalInSeconds(interval)
                         .repeatForever();
                 Trigger trigger = newTrigger()
                         .startNow()
