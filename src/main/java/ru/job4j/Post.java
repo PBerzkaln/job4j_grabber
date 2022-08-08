@@ -13,7 +13,7 @@ public class Post {
 
     private String description;
 
-    private LocalDateTime created = LocalDateTime.now();
+    private LocalDateTime created;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd-MMMM-EEEE-yyyy HH:mm:ss");
 

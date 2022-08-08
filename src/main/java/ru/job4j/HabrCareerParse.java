@@ -5,48 +5,27 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import ru.job4j.utils.DateTimeParser;
+import ru.job4j.utils.HabrCareerDateTimeParser;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HabrCareerParse {
+public class HabrCareerParse implements Parse {
 
-    private static final String SOURCE_LINK = "https://career.habr.com";
+    private static final String PAGE_LINK = "/vacancies/java_developer";
 
-    private static final String PAGE_LINK = String.format("%s/vacancies/java_developer", SOURCE_LINK);
+    private final DateTimeParser dateTimeParser;
 
-    /**В цикле проходим по первым 5 страницам.
-     *Сначала мы получаем страницу (Document).
-     *Получаем все вакансии страницы (Elements).
-     *Получаем нужные элементы (title, link, date).
-     *Сохраняем данные в виде строки в list,
-     *затем в for-each выводим их на консоль.
-     * @param args
-     * @throws IOException
-     */
+    public HabrCareerParse(DateTimeParser dateTimeParser) {
+        this.dateTimeParser = dateTimeParser;
+    }
+
     public static void main(String[] args) throws IOException {
-        List<String> savedPages = new ArrayList<>();
-        for (int i = 1; i <= 5; i++) {
-            String pages = String.format("%s?page=%d", PAGE_LINK, i);
-            Connection connection = Jsoup.connect(pages);
-            Document document = connection.get();
-            Elements rows = document.select(".vacancy-card__inner");
-            rows.forEach(row -> {
-                Element titleElement = row.select(".vacancy-card__title").first();
-                Element linkElement = titleElement.child(0);
-                String vacancyName = titleElement.text();
-                Element dateElement = row.select(".vacancy-card__date").first();
-                Element date = dateElement.child(0);
-                String[] vacancyDate = String.format("%s", date.attr("datetime")).split("T");
-                String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
-                savedPages.add(String.format("%s %s %s", vacancyDate[0], vacancyName, link));
-            });
-        }
-        for (String s : savedPages) {
-            System.out.println(s);
-        }
-        HabrCareerParse habr = new HabrCareerParse();
-        System.out.println(habr.retrieveDescription("https://career.habr.com/vacancies/1000100465"));
+       HabrCareerParse habr = new HabrCareerParse(new HabrCareerDateTimeParser());
+       List<Post> vacancies = habr.list("https://career.habr.com");
+        System.out.println(vacancies.size());
     }
 
     private String retrieveDescription(String link) throws IOException {
@@ -54,5 +33,28 @@ public class HabrCareerParse {
         Document document = connection.get();
         Element descElement = document.select(".style-ugc").first();
         return descElement.text();
+    }
+
+    @Override
+    public List<Post> list(String link) throws IOException {
+        List<Post> savedPages = new ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+            String pages = String.format("%s%s?page=%d", link, PAGE_LINK, i);
+            Connection connection = Jsoup.connect(pages);
+            Document document = connection.get();
+            Elements rows = document.select(".vacancy-card__inner");
+            for (Element row : rows) {
+                Element titleElement = row.select(".vacancy-card__title").first();
+                Element linkElement = titleElement.child(0);
+                String vacancyName = titleElement.text();
+                Element dateElement = row.select(".vacancy-card__date").first();
+                Element date = dateElement.child(0);
+                LocalDateTime vacancyDate = dateTimeParser.parse(date.attr("datetime"));
+                String link1 = String.format("%s%s", link, linkElement.attr("href"));
+                String desc = retrieveDescription(link1);
+                savedPages.add(new Post(vacancyName, link1, desc, vacancyDate));
+            }
+        }
+        return savedPages;
     }
 }
