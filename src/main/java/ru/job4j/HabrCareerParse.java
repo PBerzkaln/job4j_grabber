@@ -28,11 +28,17 @@ public class HabrCareerParse implements Parse {
         HabrCareerParse habr = new HabrCareerParse(new HabrCareerDateTimeParser());
         List<Post> vacancies = habr.list("https://career.habr.com/vacancies/java_developer?page=");
         System.out.println(vacancies.size());
+        System.out.println(vacancies.get(0));
     }
 
-    private String retrieveDescription(String link) throws IOException {
+    private String retrieveDescription(String link) {
         Connection connection = Jsoup.connect(link);
-        Document document = connection.get();
+        Document document = null;
+        try {
+            document = connection.get();
+        } catch (IllegalArgumentException | IOException e) {
+            e.printStackTrace();
+        }
         Element descElement = document.select(".style-ugc").first();
         return descElement.text();
     }
@@ -58,7 +64,7 @@ public class HabrCareerParse implements Parse {
                     String desc = retrieveDescription(link1);
                     savedPages.add(new Post(vacancyName, link1, desc, vacancyDate));
                 }
-            } catch (IOException e) {
+            } catch (IllegalArgumentException | IOException e) {
                 e.printStackTrace();
             }
         }
