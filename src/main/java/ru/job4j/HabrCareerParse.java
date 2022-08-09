@@ -36,8 +36,8 @@ public class HabrCareerParse implements Parse {
         Document document = null;
         try {
             document = connection.get();
-        } catch (IllegalArgumentException | IOException e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            throw new IllegalArgumentException();
         }
         Element descElement = document.select(".style-ugc").first();
         return descElement.text();
@@ -64,8 +64,8 @@ public class HabrCareerParse implements Parse {
                     String desc = retrieveDescription(link1);
                     savedPages.add(new Post(vacancyName, link1, desc, vacancyDate));
                 }
-            } catch (IllegalArgumentException | IOException e) {
-                e.printStackTrace();
+            } catch (IOException e) {
+                throw new IllegalArgumentException();
             }
         }
         return savedPages;
