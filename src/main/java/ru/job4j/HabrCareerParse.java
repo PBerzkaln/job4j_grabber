@@ -47,7 +47,7 @@ public class HabrCareerParse implements Parse {
 
     private String retrieveDescription(String link) {
         Connection connection = Jsoup.connect(link);
-        Document document = null;
+        Document document;
         try {
             document = connection.get();
         } catch (IOException e) {
@@ -64,8 +64,7 @@ public class HabrCareerParse implements Parse {
             String pages = String.format("%s%d", link, i);
             try {
                 Connection connection = Jsoup.connect(pages);
-                Document document = null;
-                document = connection.get();
+                Document document = connection.get();
                 Elements rows = document.select(".vacancy-card__inner");
                 for (Element row : rows) {
                     Element titleElement = row.select(".vacancy-card__title").first();
