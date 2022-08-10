@@ -5,12 +5,16 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import ru.job4j.quartz.AlertRabbit;
 import ru.job4j.utils.DateTimeParser;
 import ru.job4j.utils.HabrCareerDateTimeParser;
 import java.io.IOException;
+import java.io.InputStream;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 public class HabrCareerParse implements Parse {
 
@@ -24,11 +28,21 @@ public class HabrCareerParse implements Parse {
         this.dateTimeParser = dateTimeParser;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         HabrCareerParse habr = new HabrCareerParse(new HabrCareerDateTimeParser());
         List<Post> vacancies = habr.list("https://career.habr.com/vacancies/java_developer?page=");
         System.out.println(vacancies.size());
         System.out.println(vacancies.get(0));
+        Properties properties = new Properties();
+        try (InputStream fis = AlertRabbit.class.getClassLoader()
+                .getResourceAsStream("rabbit.properties")) {
+            properties.load(fis);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        PsqlStore psql = new PsqlStore(properties);
+        psql.save(vacancies.get(0));
+        System.out.println(psql.getAll());
     }
 
     private String retrieveDescription(String link) {
