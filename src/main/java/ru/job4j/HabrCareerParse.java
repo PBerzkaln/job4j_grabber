@@ -28,6 +28,10 @@ public class HabrCareerParse implements Parse {
         this.dateTimeParser = dateTimeParser;
     }
 
+    /**Метод демонстрирует работу класса.
+     * @param args
+     * @throws SQLException
+     */
     public static void main(String[] args) throws SQLException {
         HabrCareerParse habr = new HabrCareerParse(new HabrCareerDateTimeParser());
         List<Post> vacancies = habr.list("https://career.habr.com/vacancies/java_developer?page=");
@@ -45,6 +49,12 @@ public class HabrCareerParse implements Parse {
         System.out.println(psql.getAll());
     }
 
+    /**Принимает ссылку на конкретную запись
+     *в списке вакансий и переходит на страницу по ссылке.
+     *Читает и возвращает весь текст из блока описание вакансии.
+     * @param link
+     * @return
+     */
     private String retrieveDescription(String link) {
         Connection connection = Jsoup.connect(link);
         Document document;
@@ -57,6 +67,14 @@ public class HabrCareerParse implements Parse {
         return descElement.text();
     }
 
+    /**Принимает шаблон ссылки на страницу с вакансиями.
+     *В цикле проходит по первым пяти страницам парся
+     *ссылку на страницу с вакансией, дату создания, названием,
+     *а также описание через метод {@link #retrieveDescription(String)}.
+     *Формирует объект Post и помещает его в List.
+     * @param link
+     * @return List с объектами Post
+     */
     @Override
     public List<Post> list(String link) {
         List<Post> savedPages = new ArrayList<>();
