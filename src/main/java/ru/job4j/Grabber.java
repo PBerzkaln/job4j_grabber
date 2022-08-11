@@ -2,10 +2,7 @@ package ru.job4j;
 
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
-import ru.job4j.quartz.AlertRabbit;
 import ru.job4j.utils.HabrCareerDateTimeParser;
-
-import java.awt.*;
 import java.io.*;
 import java.sql.SQLException;
 import java.util.List;
@@ -17,6 +14,8 @@ import static org.quartz.TriggerBuilder.newTrigger;
 public class Grabber implements Grab {
     private final Properties cfg = new Properties();
 
+    private static String link = "https://career.habr.com/vacancies/java_developer?page=";
+
     public Store store() throws SQLException {
         return new PsqlStore(cfg);
     }
@@ -27,9 +26,11 @@ public class Grabber implements Grab {
         return scheduler;
     }
 
-    public void cfg() throws IOException {
+    public void cfg() {
         try (InputStream in = Grabber.class.getClassLoader().getResourceAsStream("app.properties")) {
             cfg.load(in);
+        } catch (IOException e) {
+            throw new IllegalArgumentException();
         }
     }
 
@@ -60,9 +61,9 @@ public class Grabber implements Grab {
             Parse parse = (Parse) map.get("parse");
             List<Post> vacancies = null;
             try {
-                vacancies = parse.list("https://career.habr.com/vacancies/java_developer?page=");
+                vacancies = parse.list(link);
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new IllegalArgumentException();
             }
             for (var v : vacancies) {
                 store.save(v);
@@ -70,11 +71,25 @@ public class Grabber implements Grab {
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         Grabber grab = new Grabber();
         grab.cfg();
-        Scheduler scheduler = grab.scheduler();
-        Store store = grab.store();
-        grab.init(new HabrCareerParse(new HabrCareerDateTimeParser()), store, scheduler);
+        Scheduler scheduler = null;
+        try {
+            scheduler = grab.scheduler();
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
+        Store store = null;
+        try {
+            store = grab.store();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            grab.init(new HabrCareerParse(new HabrCareerDateTimeParser()), store, scheduler);
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
     }
 }
