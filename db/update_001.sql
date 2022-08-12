@@ -6,8 +6,8 @@ create table if not exists rabbit(
 create table if not exists post(
     id serial primary key,
     name varchar(255),
-    text text,
     link text not null,
+    text text,
     created timestamp,
     unique (link)
 );
